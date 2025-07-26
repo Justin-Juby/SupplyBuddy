@@ -45,9 +45,7 @@ SupplyBuddy/
 ├── tailwind.config.js
 └── vite.config.js
 
-yaml
-Copy
-Edit
+
 
 ---
 
