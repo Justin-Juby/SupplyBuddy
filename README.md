@@ -53,16 +53,16 @@ SupplyBuddy/
 git clone https://github.com/Justin-Juby/SupplyBuddy.git
 cd SupplyBuddy
 
-2. Install Dependencies
-bash
+### 2.Install dependcies
+
+```bash
 npm install
 
-3. Start the Development Server
-bash
+### 3. Start the Development Server
+```bash
 npm run dev
 
 
-🌍 Live Demo
-👉 https://supply-buddy.vercel.app/vendor
+## 🌍 Live Demo
 
-<img width="1885" height="860" alt="image" src="https://github.com/user-attachments/assets/302aebd4-68bd-4525-965e-8d474ff75a09" />
+👉 [Visit SupplyBuddy Live](https://supply-buddy.vercel.app/)
