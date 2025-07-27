@@ -6,68 +6,73 @@ const inventoryItems = ["tomatoes", "potatoes", "garlic", "green chilies"];
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    {
-      from: "bot",
-      text: "Hey hey 👋 I'm SupplyBuddy's chat pal. Ask me anything about ingredients or ordering!",
-    },
+    { from: "bot", text: "Hey hey 👋 I'm SupplyBuddy's chat pal. Ask me anything about ingredients or ordering!" },
   ]);
   const [input, setInput] = useState("");
 
-  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
-
-  const extractItem = (msg) => {
-    return inventoryItems.find((item) => msg.includes(item));
-  };
-
-  const generateReply = (msg) => {
-    const lower = msg.toLowerCase();
-
-    const casualReplies = [
-      "Cool cool 😎",
-      "Alrighty then!",
-      "Bet! 🙌",
-      "No worries ✌️",
-      "You're all set 💯",
-      "Sounds good 🤙",
-      "Okay okay 🫡",
-      "Haha gotchu 👌"
-    ];
-
-    if (/(hello|hi|hey|yo|sup|what's up)/.test(lower)) {
-      return "Hey hey 👋 Need help finding something?";
-    }
-
-    if (/(thank you|thanks|cool|awesome|ok|okay|fine|nice|great|alright|got it|k|hmm|huh|hmm ok|okey)/.test(lower)) {
-      return casualReplies[Math.floor(Math.random() * casualReplies.length)];
-    }
-
-    if (/(how to|use|help|what can you do|instructions|guide)/.test(lower)) {
-      return "You can browse ingredients in the Vendor Dashboard or update stock in the Supplier view 💼";
-    }
-
-    if (/(buy|get|order|place|need|want)/.test(lower)) {
-      const found = extractItem(lower);
-      return found
-        ? `Just click \"Place Order\" for ${capitalize(found)} in the Vendor Dashboard 🚀`
-        : "Click any item card on the Vendor Dashboard to place an order! 💸";
-    }
-
-    const found = extractItem(lower);
-    if (found) {
-      return `✅ ${capitalize(found)} is currently in stock and ready to order from the Vendor Dashboard!`;
-    }
-
-    if (/(stock|inventory|available|have|show)/.test(lower)) {
-      return `Right now, we've got: ${inventoryItems.map(capitalize).join(", ")} 📦`;
-    }
-
-    return "Hmm 🤔 I didn’t catch that. Try asking about ingredients or how to order!";
-  };
+  const normalize = (str) => str.toLowerCase().trim();
 
   const handleSend = () => {
     if (!input.trim()) return;
+
+    const userText = normalize(input);
     const userMsg = { from: "user", text: input };
-    const botMsg = { from: "bot", text: generateReply(input) };
+    let botMsg = null;
+
+    // 🔹 Friendly acknowledgments
+    if (["ok", "okay", "thanks", "thank you", "cool", "great", "nice"].includes(userText)) {
+      const friendlyReplies = [
+        "Cool cool 😎",
+        "No worries ✌️",
+        "Glad to help!",
+        "Bet! 🙌",
+        "Happy to help 😊",
+      ];
+      botMsg = { from: "bot", text: friendlyReplies[Math.floor(Math.random() * friendlyReplies.length)] };
+    }
+
+    // 🔹 Asking how to order
+    else if (userText.includes("how") && userText.includes("order")) {
+      botMsg = {
+        from: "bot",
+        text: "Click any item on the Vendor Dashboard to place an order! 🛒",
+      };
+    }
+
+    // 🔹 Asking about specific ingredients
+    else if (userText.includes("where") || userText.includes("find") || userText.includes("buy")) {
+      const foundItem = inventoryItems.find((item) => userText.includes(item));
+      if (foundItem) {
+        botMsg = {
+          from: "bot",
+          text: `You can find ${foundItem} in the Vendor Dashboard. Just scroll down and click 'Place Order'! ✅`,
+        };
+      } else {
+        botMsg = {
+          from: "bot",
+          text: "Hmm 🤔 I couldn't find that ingredient. Try searching for it in the dashboard!",
+        };
+      }
+    }
+
+    // 🔹 Direct item name detection
+    else if (inventoryItems.some((item) => userText.includes(item))) {
+      const match = inventoryItems.find((item) => userText.includes(item));
+      botMsg = {
+        from: "bot",
+        text: `Looking for ${match}? Check it out in the Vendor Dashboard 👀`,
+      };
+    }
+
+    // 🔹 Fallback message only if nothing else matched
+    if (!botMsg) {
+      botMsg = {
+        from: "bot",
+        text: "Hmm 🧐 I didn’t catch that. You can ask about ingredients, how to order, or just say hi!",
+      };
+    }
+
+    // 🧠 Add messages
     setMessages((prev) => [...prev, userMsg, botMsg]);
     setInput("");
   };
@@ -121,3 +126,4 @@ export default function ChatBot() {
     </>
   );
 }
+
