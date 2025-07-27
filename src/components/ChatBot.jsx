@@ -22,45 +22,59 @@ export default function ChatBot() {
   };
 
   const generateReply = (msg) => {
-    const lower = msg.toLowerCase();
+  const lower = msg.toLowerCase();
 
-    // Greetings
-    if (/(hello|hi|hey|yo|sup|what's up)/.test(lower)) {
-      return "Hey hey 👋 Need help finding something?";
-    }
+  const casualReplies = [
+    "Cool cool 😎",
+    "Alrighty then!",
+    "Bet! 🙌",
+    "No worries ✌️",
+    "You're all set 💯",
+    "Sounds good 🤙",
+    "Okay okay 🫡",
+    "Haha gotchu 👌"
+  ];
 
-    // Gratitude
-    if (/(thank you|thanks|cool|awesome)/.test(lower)) {
-      return "You're welcome! 😎 I'm always here to help!";
-    }
+  // Greetings
+  if (/(hello|hi|hey|yo|sup|what's up)/.test(lower)) {
+    return "Hey hey 👋 Need help finding something?";
+  }
 
-    // How to use
-    if (/(how to|use|help|what can you do)/.test(lower)) {
-      return "You can explore the Vendor Dashboard to place orders or the Supplier Dashboard to update stock 💼";
-    }
+  // Gratitude or casual confirmations
+  if (
+    /(thank you|thanks|cool|awesome|ok|okay|fine|nice|great|alright|got it|k|hmm|huh|hmm ok|okey)/.test(lower)
+  ) {
+    return casualReplies[Math.floor(Math.random() * casualReplies.length)];
+  }
 
-    // Buy/order intent
-    if (/(buy|get|order|place|need|want)/.test(lower)) {
-      const found = extractItem(lower);
-      return found
-        ? `Just hit "Place Order" on the ${capitalize(found)} card in the Vendor Dashboard 🚀`
-        : "Click any item on the Vendor Dashboard to place an order! 💸";
-    }
+  // How to use / Help intent
+  if (/(how to|use|help|what can you do|instructions|guide)/.test(lower)) {
+    return "You can browse ingredients in the Vendor Dashboard or update stock in the Supplier view 💼";
+  }
 
-    // Item availability or location
+  // Buy/order intent
+  if (/(buy|get|order|place|need|want)/.test(lower)) {
     const found = extractItem(lower);
-    if (found) {
-      return `✅ ${capitalize(found)} is in stock! You’ll find it in the Vendor Dashboard 🛒`;
-    }
+    return found
+      ? `Just click "Place Order" for ${capitalize(found)} in the Vendor Dashboard 🚀`
+      : "Click any item card on the Vendor Dashboard to place an order! 💸";
+  }
 
-    // Stock check
-    if (/(stock|inventory|available|have)/.test(lower)) {
-      return `Right now, we’ve got: ${inventoryItems.map(capitalize).join(", ")} 📦`;
-    }
+  // Direct item check
+  const found = extractItem(lower);
+  if (found) {
+    return `✅ ${capitalize(found)} is currently in stock and ready to order from the Vendor Dashboard!`;
+  }
 
-    // Fallback
-    return "Hmm 🤔 I didn’t catch that. Try asking about ingredients or how to order!";
-  };
+  // Inventory overview
+  if (/(stock|inventory|available|have|show)/.test(lower)) {
+    return `Right now, we've got: ${inventoryItems.map(capitalize).join(", ")} 📦`;
+  }
+
+  // Fallback
+  return "Hmm 🤔 I didn’t catch that. Try asking about ingredients or how to order!";
+};
+
 
   const extractItem = (msg) => {
     return inventoryItems.find((item) => msg.includes(item));
