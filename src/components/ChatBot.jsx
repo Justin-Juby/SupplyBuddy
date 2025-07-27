@@ -1,65 +1,76 @@
 import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 
+const inventoryItems = ["tomatoes", "potatoes", "garlic", "green chilies"];
+
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Yo! I’m your buddy 🤖 Ask me anything!" },
+    {
+      from: "bot",
+      text: "Hey hey 👋 I'm SupplyBuddy's chat pal. Ask me anything about ingredients or ordering!",
+    },
   ]);
   const [input, setInput] = useState("");
 
   const handleSend = () => {
     if (!input.trim()) return;
-
-    const userMessage = { from: "user", text: input };
-    const reply = generateReply(input.toLowerCase());
-    const botMessage = { from: "bot", text: reply };
-
-    setMessages((prev) => [...prev, userMessage, botMessage]);
+    const userMsg = { from: "user", text: input };
+    const botMsg = { from: "bot", text: generateReply(input) };
+    setMessages((prev) => [...prev, userMsg, botMsg]);
     setInput("");
   };
 
   const generateReply = (msg) => {
-    // Greeting
-    if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey")) {
-      return "Hey there! 👋 Need help finding something?";
+    const lower = msg.toLowerCase();
+
+    // Greetings
+    if (/(hello|hi|hey|yo|sup|what's up)/.test(lower)) {
+      return "Hey hey 👋 Need help finding something?";
     }
 
-    // Thanks
-    if (msg.includes("thanks") || msg.includes("thank you")) {
-      return "No problem! Glad to help 😎";
+    // Gratitude
+    if (/(thank you|thanks|cool|awesome)/.test(lower)) {
+      return "You're welcome! 😎 I'm always here to help!";
     }
 
-    // Buy or Get
-    if (msg.includes("buy") || msg.includes("get") || msg.includes("order")) {
-      const item = extractItem(msg);
-      return item
-        ? `You can place an order for ${item} directly from the Vendor Dashboard!`
-        : "Just click on any item in the Vendor Dashboard to place an order ✅";
+    // How to use
+    if (/(how to|use|help|what can you do)/.test(lower)) {
+      return "You can explore the Vendor Dashboard to place orders or the Supplier Dashboard to update stock 💼";
     }
 
-    // In stock / inventory
-    if (msg.includes("stock") || msg.includes("available") || msg.includes("inventory")) {
-      return "We currently have Tomatoes 🍅, Potatoes 🥔, Garlic 🧄, and Green Chilies 🌶️ in stock!";
+    // Buy/order intent
+    if (/(buy|get|order|place|need|want)/.test(lower)) {
+      const found = extractItem(lower);
+      return found
+        ? `Just hit "Place Order" on the ${capitalize(found)} card in the Vendor Dashboard 🚀`
+        : "Click any item on the Vendor Dashboard to place an order! 💸";
     }
 
-    // Usage help
-    if (msg.includes("how to") || msg.includes("use") || msg.includes("help")) {
-      return "Just explore the Vendor or Supplier Dashboard, click on items to order or update stock. Easy peasy! 💡";
+    // Item availability or location
+    const found = extractItem(lower);
+    if (found) {
+      return `✅ ${capitalize(found)} is in stock! You’ll find it in the Vendor Dashboard 🛒`;
+    }
+
+    // Stock check
+    if (/(stock|inventory|available|have)/.test(lower)) {
+      return `Right now, we’ve got: ${inventoryItems.map(capitalize).join(", ")} 📦`;
     }
 
     // Fallback
-    return "Oops, I'm still learning 🤖 Try asking about items, stock, or how to order!";
+    return "Hmm 🤔 I didn’t catch that. Try asking about ingredients or how to order!";
   };
 
   const extractItem = (msg) => {
-    const keywords = ["tomatoes", "potatoes", "garlic", "green chilies"];
-    return keywords.find((item) => msg.includes(item.toLowerCase()));
+    return inventoryItems.find((item) => msg.includes(item));
   };
+
+  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   return (
     <>
-      {/* Toggle Button */}
+      {/* Toggle Chat Button */}
       <button
         className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-green-600 hover:bg-green-700 text-white shadow-lg transition"
         onClick={() => setIsOpen(!isOpen)}
@@ -70,9 +81,8 @@ export default function ChatBot() {
       {/* Chat Window */}
       {isOpen && (
         <div className="fixed bottom-20 right-6 z-40 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col">
-          <div className="p-3 font-semibold bg-green-600 text-white text-center">
-            Chat Assistant
-          </div>
+          <div className="p-3 font-semibold bg-green-600 text-white text-center">💬 Chat Assistant</div>
+
           <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2 text-sm">
             {messages.map((msg, i) => (
               <div
@@ -87,10 +97,11 @@ export default function ChatBot() {
               </div>
             ))}
           </div>
+
           <div className="flex border-t border-gray-200 dark:border-gray-700">
             <input
               type="text"
-              placeholder="Type a message..."
+              placeholder="Type something..."
               className="flex-1 px-3 py-2 text-sm bg-transparent outline-none dark:text-white"
               value={input}
               onChange={(e) => setInput(e.target.value)}
