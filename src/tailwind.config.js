@@ -5,8 +5,19 @@ export default {
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
   darkMode: 'class',
-  theme: {
-    extend: {},
+  // tailwind.config.js
+theme: {
+  extend: {
+    boxShadow: {
+      glass: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+      glow: '0 4px 15px rgba(72, 187, 120, 0.6)'
+    },
+    backdropBlur: {
+      xs: '2px',
+    },
+    transitionDuration: {
+      400: '400ms',
+    }
   },
-  plugins: [],
 }
+
