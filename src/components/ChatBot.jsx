@@ -6,7 +6,7 @@ export default function ChatBot() {
   const [messages, setMessages] = useState([
     {
       from: "bot",
-      text: "Hey there 👋 I’m SupplyBuddy Bot — here to help vendors & suppliers. Ask me anything like ‘Where can I find garlic?’ or ‘How to buy tomatoes?’ 😄",
+      text: "Hey there 👋 I’m your SupplyBuddy Bot. Need help with inventory, ordering, or just wanna vibe? Ask away! 😄",
     },
   ]);
   const [input, setInput] = useState("");
@@ -14,35 +14,51 @@ export default function ChatBot() {
   const getBotReply = (userMsg) => {
     const msg = userMsg.toLowerCase();
 
-    // Simple greetings
-    if (/^(hi|hello|hey)\b/.test(msg)) return "Hey! What can I help you with today? 🤗";
-    if (/thank(s| you)/.test(msg)) return "Aww, you’re welcome! 😄";
-    if (/ok(ay)?|cool|nice/.test(msg)) return "Cool cool 😎 Let me know if you need anything else!";
+    // Greetings
+    if (/^(hi|hello|hey)\b/.test(msg)) return "Hey hey! 👋 What’s up?";
+    if (/thank(s| you)/.test(msg)) return "Aww, you’re welcome bestie 🫶";
+    if (/ok(ay)?|cool|nice/.test(msg)) return "Cool cool 😎 Let’s keep it rollin’!";
 
-    // Asking about where items are
-    if (/where.*(tomato|potato|chili|garlic)/.test(msg))
-      return "You can find that item in the Vendor Inventory. Just hit 'Explore Inventory' on the homepage! 🛒";
+    // Farewells
+    if (/bye|see ya|goodbye|peace/.test(msg)) return "Catch ya later! 👋 Stay spicy like our chilies 🌶️";
+    
+    // GenZ Reacts
+    if (/lol|lmao|haha|rofl/.test(msg)) return "😂 You crack me up fr";
 
-    if (/where.*(they|items|ingredients)/.test(msg))
-      return "All items are listed under 'Vendor Inventory'. Go check it out! 👀";
-
-    // Buying or ordering
+    // Ordering questions
     if (/how.*(buy|order|get)/.test(msg))
-      return "Just click 'Place Order' next to the item you want. It’ll show up in your recent orders. Easy peasy! ✅";
+      return "Just click 'Place Order' next to any item in the Vendor Dashboard! 🛒 It’s that simple.";
 
-    // Asking about specific items
-    if (/\b(tomato|potato|chili|garlic)\b/.test(msg))
-      return `Yes, ${msg.match(/\b(tomato|potato|chili|garlic)\b/)[0]} is in stock! ✅ Check inventory to place an order.`;
+    // Where are items
+    if (/where.*(tomato|potato|chili|garlic)/.test(msg))
+      return "Head over to Vendor Inventory — they’re chillin’ right there! 🥔🍅";
 
-    // Cart-related
-    if (/cart/.test(msg)) return "Your cart icon is floating on the Vendor page. Add items and click to view orders 🛒";
+    if (/where.*(items|inventory|ingredients)/.test(msg))
+      return "All stocked items are visible in the Vendor page 📦";
 
-    // Supplier-related
+    // Specific item mentions
+    if (/\b(tomato|potato|chili|garlic)\b/.test(msg)) {
+      const item = msg.match(/\b(tomato|potato|chili|garlic)\b/)[0];
+      return `Yep, ${item} is totally in stock 🔥 Check the Vendor Inventory to grab it!`;
+    }
+
+    // Supplier related
     if (/upload|supplier|stock/.test(msg))
-      return "Suppliers can update stock in real-time from the Supplier Dashboard 📦";
+      return "Suppliers can update or upload items in their dashboard. Real-time stock, baby! 📈";
 
-    // Default fallback
-    return "Hmm... I didn’t get that 😅 Try asking about items, how to buy, or supplier updates!";
+    // Cart
+    if (/cart/.test(msg))
+      return "Click on the 🛒 cart bubble on the Vendor page to see what you’ve added! Don’t overstock 😉";
+
+    // Fallback — witty GenZ-style
+    const fallbackReplies = [
+      "Woah 😵 that flew right over my processor...",
+      "Uhhh... English please? Or Binary? 😅",
+      "Sorry bestie, I’m not that smart yet... but I’m learning 💻📚",
+      "I lowkey didn’t get that 😬 Try asking about items, orders or stock!"
+    ];
+
+    return fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
   };
 
   const handleSend = () => {
