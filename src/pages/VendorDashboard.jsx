@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, ShoppingCart, Trash2 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle, ShoppingCart } from "lucide-react";
+import { motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 
 import tomatoImg from "../assets/tomatoes.jpg";
@@ -9,63 +9,41 @@ import chiliImg from "../assets/green-chilies.jpg";
 import garlicImg from "../assets/garlic.jpg";
 
 const materials = [
-  { id: 1, name: "Tomatoes", price: 25, image: tomatoImg },
-  { id: 2, name: "Potatoes", price: 18, image: potatoImg },
-  { id: 3, name: "Green Chilies", price: 60, image: chiliImg },
-  { id: 4, name: "Garlic", price: 200, image: garlicImg },
+  { id: 1, name: "Tomatoes", price: "₹25/kg", image: tomatoImg },
+  { id: 2, name: "Potatoes", price: "₹18/kg", image: potatoImg },
+  { id: 3, name: "Green Chilies", price: "₹60/kg", image: chiliImg },
+  { id: 4, name: "Garlic", price: "₹200/kg", image: garlicImg },
 ];
 
 export default function VendorDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [orders, setOrders] = useState([]);
+  const [quantities, setQuantities] = useState({});
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
-
   const vendorName = "Justin Juby";
 
   const filteredMaterials = materials.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const placeOrder = (itemName) => {
+  const placeOrder = (item) => {
+    const qty = quantities[item.id] || 1;
     const newOrder = {
-      itemName,
-      quantity: 1,
+      itemName: item.name,
+      quantity: qty,
       vendorName,
       createdAt: new Date().toISOString(),
     };
-    setOrders([newOrder, ...orders]);
-    toast.success(`✅ Order placed for ${itemName}`);
+
+    toast.success(`✅ Ordered ${qty} kg of ${item.name}`);
+    setOrders((prev) => [newOrder, ...prev]);
+    setCart((prev) => [...prev, newOrder]);
   };
 
-  const addToCart = (item) => {
-    const exists = cart.find((c) => c.id === item.id);
-    if (exists) {
-      const updatedCart = cart.map((c) =>
-        c.id === item.id ? { ...c, quantity: c.quantity + 1 } : c
-      );
-      setCart(updatedCart);
-    } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
-    }
-    toast.success(`${item.name} added to cart`);
-  };
-
-  const removeFromCart = (id) => {
-    setCart(cart.filter((item) => item.id !== id));
-  };
-
-  const handlePlaceAllOrders = () => {
-    const newOrders = cart.map((item) => ({
-      itemName: item.name,
-      quantity: item.quantity,
-      vendorName,
-      createdAt: new Date().toISOString(),
-    }));
-    setOrders([...newOrders, ...orders]);
-    toast.success(`✅ ${newOrders.length} orders placed`);
-    setCart([]);
-    setShowCart(false);
+  const handleQuantityChange = (id, value) => {
+    const qty = Math.max(1, parseInt(value) || 1);
+    setQuantities((prev) => ({ ...prev, [id]: qty }));
   };
 
   return (
@@ -78,7 +56,7 @@ export default function VendorDashboard() {
         Vendor Inventory
       </motion.h2>
 
-      {/* 🔍 Search */}
+      {/* 🔍 Search Bar */}
       <div className="mb-6 text-center">
         <input
           type="text"
@@ -89,7 +67,46 @@ export default function VendorDashboard() {
         />
       </div>
 
-      {/* 🧺 Inventory Grid */}
+      {/* 🛒 Cart Preview */}
+      <div className="text-right mb-6">
+        <button
+          className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 shadow transition"
+          onClick={() => setShowCart(!showCart)}
+        >
+          <ShoppingCart className="w-5 h-5 mr-2" />
+          View Cart ({cart.length})
+        </button>
+      </div>
+
+      {showCart && (
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md mb-6">
+          <h3 className="text-xl font-semibold mb-3">🛒 Your Cart</h3>
+          {cart.length === 0 ? (
+            <p className="text-gray-500 dark:text-gray-400">No items in cart.</p>
+          ) : (
+            <ul className="space-y-2">
+              {cart.map((order, idx) => (
+                <li
+                  key={idx}
+                  className="flex justify-between items-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-md"
+                >
+                  <span>
+                    {order.itemName} — {order.quantity} kg
+                  </span>
+                  <span className="text-xs text-gray-500 dark:text-gray-300">
+                    {new Date(order.createdAt).toLocaleString("en-IN", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {/* 🧱 Inventory Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {filteredMaterials.map((item) => (
           <motion.div
@@ -104,108 +121,56 @@ export default function VendorDashboard() {
             />
             <div className="space-y-2 px-2">
               <h3 className="text-lg font-bold text-gray-900 dark:text-white">{item.name}</h3>
-              <p className="text-green-600 dark:text-green-400 font-medium">₹{item.price}/kg</p>
+              <p className="text-green-600 dark:text-green-400 font-medium">{item.price}</p>
               <div className="flex items-center text-sm text-gray-500 dark:text-gray-300">
                 <CheckCircle className="h-4 w-4 mr-1 text-green-500" />
                 In Stock
               </div>
-              <div className="flex space-x-2 mt-3">
-                <button
-                  onClick={() => addToCart(item)}
-                  className="w-1/2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"
-                >
-                  Add to Cart
-                </button>
-                <button
-                  onClick={() => placeOrder(item.name)}
-                  className="w-1/2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md transition"
-                >
-                  Order Now
-                </button>
-              </div>
+              <input
+                type="number"
+                min="1"
+                value={quantities[item.id] || 1}
+                onChange={(e) => handleQuantityChange(item.id, e.target.value)}
+                className="w-full mt-2 px-2 py-1 border rounded-md text-sm dark:bg-gray-800 dark:text-white dark:border-gray-600"
+                placeholder="Quantity in kg"
+              />
+              <button
+                onClick={() => placeOrder(item)}
+                className="mt-3 w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md shadow hover:shadow-green-400/40 transition-all"
+              >
+                Place Order
+              </button>
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* 🧾 Order History */}
+      {/* 📜 Order History */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md">
         <h3 className="text-xl font-semibold mb-4">Your Recent Orders</h3>
-        {orders.filter((o) => o.vendorName === vendorName).length === 0 ? (
+        {orders.length === 0 ? (
           <p className="text-gray-500 dark:text-gray-400">No orders yet.</p>
         ) : (
           <ul className="space-y-2">
-            {orders
-              .filter((o) => o.vendorName === vendorName)
-              .map((order, idx) => (
-                <li
-                  key={idx}
-                  className="flex justify-between items-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-md"
-                >
-                  <span>{order.itemName} (x{order.quantity || 1})</span>
-                  <span className="text-sm text-gray-500 dark:text-gray-300">
-                    {new Date(order.createdAt).toLocaleString("en-IN", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
-                  </span>
-                </li>
-              ))}
+            {orders.map((order, idx) => (
+              <li
+                key={idx}
+                className="flex justify-between items-center bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-md"
+              >
+                <span>
+                  {order.itemName} — {order.quantity} kg
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-300">
+                  {new Date(order.createdAt).toLocaleString("en-IN", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                </span>
+              </li>
+            ))}
           </ul>
         )}
       </div>
-
-      {/* 🛒 Floating Cart Button */}
-      <div className="fixed top-6 right-6 z-50 flex items-center space-x-2">
-        <button
-          onClick={() => setShowCart(!showCart)}
-          className="relative flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-full shadow-lg transition"
-        >
-          <ShoppingCart className="mr-2" />
-          Cart
-          {cart.length > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 animate-pulse text-white text-xs font-bold px-2 py-0.5 rounded-full shadow">
-              {cart.reduce((acc, item) => acc + item.quantity, 0)}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* 🧺 Cart Panel */}
-      <AnimatePresence>
-        {showCart && (
-          <motion.div
-            initial={{ opacity: 0, x: 300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 300 }}
-            className="fixed top-20 right-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 w-80 shadow-xl z-50"
-          >
-            <h4 className="text-lg font-bold mb-3">Cart</h4>
-            {cart.length === 0 ? (
-              <p className="text-gray-500 dark:text-gray-400">Your cart is empty</p>
-            ) : (
-              <ul className="space-y-3 mb-4">
-                {cart.map((item) => (
-                  <li key={item.id} className="flex justify-between items-center">
-                    <span>{item.name} x{item.quantity}</span>
-                    <Trash2
-                      className="h-4 w-4 text-red-500 cursor-pointer"
-                      onClick={() => removeFromCart(item.id)}
-                    />
-                  </li>
-                ))}
-              </ul>
-            )}
-            <button
-              onClick={handlePlaceAllOrders}
-              disabled={cart.length === 0}
-              className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
-            >
-              Place All Orders
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
