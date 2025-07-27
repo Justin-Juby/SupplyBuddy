@@ -4,17 +4,42 @@ import { MessageCircle, X } from "lucide-react";
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
-    { from: "bot", text: "Hi! I’m your assistant. How can I help you today?" },
+    { from: "bot", text: "Heya 👋 I’m your buddy! What’s up?" },
   ]);
   const [input, setInput] = useState("");
 
+  const getBotReply = (msg) => {
+    const text = msg.toLowerCase();
+
+    if (text.includes("hello") || text.includes("hi")) {
+      return "Hey there! 👋 Need help with something?";
+    } else if (text.includes("order")) {
+      return "You can place an order by hitting that green 'Place Order' button 🚀";
+    } else if (text.includes("supplier")) {
+      return "Suppliers can update or upload inventory on their dashboard 💼";
+    } else if (text.includes("how are you")) {
+      return "I’m living my best digital life 😎 What about you?";
+    } else if (["ok", "okay", "k", "cool", "nice", "fine", "hmm"].includes(text)) {
+      return "Gotcha ✅";
+    } else if (text.includes("thanks") || text.includes("thank you")) {
+      return "Aww, you're welcome! 💚";
+    } else if (text.includes("bug") || text.includes("error") || text.includes("not working")) {
+      return "Yikes 😬 If something's off, just refresh or double-check your steps!";
+    } else if (text.includes("feature") || text.includes("add")) {
+      return "Got ideas? I’m all ears 👂 Tell me more!";
+    } else if (text.includes("bye")) {
+      return "Catch you later! 👋";
+    } else {
+      return "Oops 😅 I’m not that smart yet. Try rephrasing?";
+    }
+  };
+
   const handleSend = () => {
     if (!input.trim()) return;
+
     const userMsg = { from: "user", text: input };
-    const botMsg = {
-      from: "bot",
-      text: "Sorry, I didn’t understand that. I’m still learning!",
-    };
+    const botMsg = { from: "bot", text: getBotReply(input) };
+
     setMessages((prev) => [...prev, userMsg, botMsg]);
     setInput("");
   };
@@ -32,7 +57,7 @@ export default function ChatBot() {
       {/* Chat Window */}
       {isOpen && (
         <div className="fixed bottom-20 right-6 z-40 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col">
-          <div className="p-3 font-semibold bg-green-600 text-white text-center">Chat Assistant</div>
+          <div className="p-3 font-semibold bg-green-600 text-white text-center">SupplyBuddy 🤖</div>
           <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2 text-sm">
             {messages.map((msg, i) => (
               <div
@@ -50,7 +75,7 @@ export default function ChatBot() {
           <div className="flex border-t border-gray-200 dark:border-gray-700">
             <input
               type="text"
-              placeholder="Type a message..."
+              placeholder="Type something..."
               className="flex-1 px-3 py-2 text-sm bg-transparent outline-none dark:text-white"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -68,4 +93,3 @@ export default function ChatBot() {
     </>
   );
 }
-
